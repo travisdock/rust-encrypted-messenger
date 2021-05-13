@@ -7,9 +7,6 @@ use crossterm::{
   ExecutableCommand, cursor::{MoveUp, MoveDown},
 };
 
-// Lib file
-use client::Message;
-
 // Crypto stuff
 use openssl::rsa::{Rsa, Padding};
 use std::fs::File;
