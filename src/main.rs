@@ -12,7 +12,7 @@ use openssl::rsa::{Rsa, Padding};
 use std::fs::File;
 
 const LOCAL: &str = "127.0.0.1:6000";
-const MSG_SIZE: usize = 32;
+const MSG_SIZE: usize = 128;
 const USERNAME: &str = "The DUDE";
 
 fn main() {
@@ -25,10 +25,10 @@ fn main() {
         let mut buff = vec![0; MSG_SIZE];
         match client.read_exact(&mut buff) {
             Ok(_) => {
-                let msg = buff.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
-                // let msg = String::from_utf8(msg).expect("Invalid utf8 message");
+                let passphrase = String::from("rust_by_example");
+                let msg = decrypt_message(buff, &passphrase);
                 stdout().execute(MoveDown(1)).expect("failed move cursor");
-                println!("{:?}", msg);
+                println!("{}", msg);
             },
             Err(ref err) if err.kind() == ErrorKind::WouldBlock => (),
             Err(e) => {
@@ -42,7 +42,6 @@ fn main() {
                 let mut buff = msg.clone();
                 buff.resize(MSG_SIZE, 0);
                 client.write_all(&buff).expect("writing to socket failed");
-                // println!("message sent {:?}", msg);
             },
             Err(TryRecvError::Empty) => (),
             Err(TryRecvError::Disconnected) => break
@@ -56,7 +55,7 @@ fn main() {
         let mut buff = String::new();
         io::stdin().read_line(&mut buff).expect("reading from stdin failed");
         stdout().execute(MoveUp(2)).expect("failed move cursor");
-        // let msg = format!("{}: {}", USERNAME, buff.trim()).to_string();
+        let buff = format!("{}: {}", USERNAME, buff.trim()).to_string();
         let msg = encrypt_message(&buff);
         tx.send(msg).expect("You fucked up");
     }
@@ -75,13 +74,12 @@ fn encrypt_message(msg: &str) -> Vec<u8> {
     buf
 }
 
-// fn decrypt_message(msg: Message, passphrase: &str) -> String {
-//     let mut file = File::open("test_private.pem").unwrap();
-//     let mut contents = String::new();
-//     file.read_to_string(&mut contents).unwrap();
-//     let rsa = Rsa::private_key_from_pem_passphrase(contents.as_bytes(), passphrase.as_bytes()).unwrap();
-//     let mut buf: Vec<u8> = vec![0; rsa.size() as usize];
-//     rsa.private_decrypt(&msg.body, &mut buf, Padding::PKCS1).unwrap();
-//     // println!("Decrypted: {}", String::from_utf8(buf).unwrap());
-//     String::from_utf8(buf).unwrap()
-// }
+fn decrypt_message(msg: Vec<u8>, passphrase: &str) -> String {
+    let mut file = File::open("test_private.pem").unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    let rsa = Rsa::private_key_from_pem_passphrase(contents.as_bytes(), passphrase.as_bytes()).unwrap();
+    let mut buf: Vec<u8> = vec![0; rsa.size() as usize];
+    rsa.private_decrypt(&msg, &mut buf, Padding::PKCS1).unwrap();
+    String::from_utf8(buf).unwrap()
+}
