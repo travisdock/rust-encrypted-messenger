@@ -1,8 +1,12 @@
-use std::io::{self, ErrorKind, Read, Write};
+use std::io::{self, ErrorKind, Read, Write, stdout};
 use std::net::TcpStream;
 use std::sync::mpsc::{self, TryRecvError};
 use std::thread;
 use std::time::Duration;
+// use crossterm::{ExecutableCommand, cursor::MoveToPreviousLine};
+use crossterm::{
+  ExecutableCommand, cursor::{MoveUp, MoveDown},
+};
 
 // Lib file
 use client::Message;
@@ -13,6 +17,7 @@ use std::fs::File;
 
 const LOCAL: &str = "127.0.0.1:6000";
 const MSG_SIZE: usize = 32;
+const USERNAME: &str = "The DUDE";
 
 fn main() {
     let mut client = TcpStream::connect(LOCAL).expect("Stream failed to connect");
@@ -26,7 +31,8 @@ fn main() {
             Ok(_) => {
                 let msg = buff.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
                 let msg = String::from_utf8(msg).expect("Invalid utf8 message");
-                println!("message recv {:?}", msg);
+                stdout().execute(MoveDown(1)).expect("failed move cursor");
+                println!("{}", msg);
             },
             Err(ref err) if err.kind() == ErrorKind::WouldBlock => (),
             Err(_) => {
@@ -40,7 +46,7 @@ fn main() {
                 let mut buff = msg.clone().into_bytes();
                 buff.resize(MSG_SIZE, 0);
                 client.write_all(&buff).expect("writing to socket failed");
-                println!("message sent {:?}", msg);
+                // println!("message sent {:?}", msg);
             },
             Err(TryRecvError::Empty) => (),
             Err(TryRecvError::Disconnected) => break
@@ -53,7 +59,8 @@ fn main() {
     loop {
         let mut buff = String::new();
         io::stdin().read_line(&mut buff).expect("reading from stdin failed");
-        let msg = buff.trim().to_string();
+        stdout().execute(MoveUp(2)).expect("failed move cursor");
+        let msg = format!("{}: {}", USERNAME, buff.trim()).to_string();
         // encrypt_message(&msg);
         if msg == ":quit" || tx.send(msg).is_err() {break}
     }
