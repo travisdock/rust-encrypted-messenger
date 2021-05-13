@@ -3,7 +3,6 @@ use std::net::TcpStream;
 use std::sync::mpsc::{self, TryRecvError};
 use std::thread;
 use std::time::Duration;
-// use crossterm::{ExecutableCommand, cursor::MoveToPreviousLine};
 use crossterm::{
   ExecutableCommand, cursor::{MoveUp, MoveDown},
 };
