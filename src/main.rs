@@ -14,13 +14,13 @@ use crate::lib::crypto::*;
 
 const LOCAL: &str = "127.0.0.1:6000";
 const MSG_SIZE: usize = 256;
-const USERNAME: &str = "SLAYER9000";
 
 fn main() {
     println!("Connecting to server...");
     match TcpStream::connect(LOCAL) {
         Ok(client) => {
             client.set_nonblocking(true).expect("failed to initiate non-blocking");
+
             match authenticate_keys() {
                 Ok(_) => (),
                 Err(_) => {
@@ -80,11 +80,16 @@ fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, mut client: TcpStream) {
 }
 
 fn start_input_loop(tx: mpsc::Sender<Vec<u8>>) {
+    println!("Choose your username:");
+    let mut username = String::new();
+    io::stdin().read_line(&mut username).expect("reading from stdin failed");
+    stdout().execute(MoveUp(1)).expect("failed move cursor");
+
     println!("Write a Message:");
     loop {
         let mut buff = String::new();
         io::stdin().read_line(&mut buff).expect("reading from stdin failed");
-        let buff = format!("{}: {}", USERNAME, buff.trim()).to_string();
+        let buff = format!("{}: {}", username.trim(), buff.trim()).to_string();
         stdout().execute(MoveUp(1)).expect("failed move cursor");
         println!("{}", buff);
         let msg = encrypt_message(&buff);
