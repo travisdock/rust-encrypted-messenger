@@ -1,1 +1,5 @@
 /target
+test_public.pem
+test_private.pem
+other_test_public.pem
+other_test_private.pem

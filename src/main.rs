@@ -14,20 +14,24 @@ use crate::lib::crypto::*;
 
 const LOCAL: &str = "127.0.0.1:6000";
 const MSG_SIZE: usize = 256;
-const USERNAME: &str = "The DUDE";
-const PASSPHRASE: &str = "rust_by_example";
+const USERNAME: &str = "SLAYER9000";
 
 fn main() {
     println!("Connecting to server...");
     match TcpStream::connect(LOCAL) {
         Ok(client) => {
             client.set_nonblocking(true).expect("failed to initiate non-blocking");
-            let listener_passphrase = authenticate_key();
-            let input_loop_passphrase = listener_passphrase.clone();
+            match authenticate_keys() {
+                Ok(_) => (),
+                Err(_) => {
+                    println!("Could not authenticate keys");
+                    return ()
+                }
+            }
 
             let (tx, rx) = mpsc::channel::<Vec<u8>>();
-            spawn_listener_thread(rx, listener_passphrase, client);
-            start_input_loop(input_loop_passphrase, tx);
+            spawn_listener_thread(rx, client);
+            start_input_loop(tx);
 
             println!("bye bye!");
         },
@@ -37,12 +41,12 @@ fn main() {
     }
 }
 
-fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, passphrase: String, mut client: TcpStream) {
+fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, mut client: TcpStream) {
     thread::spawn(move || loop {
         let mut buff = vec![0; MSG_SIZE];
         match client.read_exact(&mut buff) {
             Ok(_) => {
-                match decrypt_message(buff, &passphrase) {
+                match decrypt_message(buff) {
                     Ok(msg) => {
                       stdout().execute(MoveLeft(5000)).expect("failed move cursor");
                       println!("{}", msg)
@@ -75,7 +79,7 @@ fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, passphrase: String, mut cl
     });
 }
 
-fn start_input_loop(send_passphrase: String, tx: mpsc::Sender<Vec<u8>>) {
+fn start_input_loop(tx: mpsc::Sender<Vec<u8>>) {
     println!("Write a Message:");
     loop {
         let mut buff = String::new();
@@ -83,7 +87,7 @@ fn start_input_loop(send_passphrase: String, tx: mpsc::Sender<Vec<u8>>) {
         let buff = format!("{}: {}", USERNAME, buff.trim()).to_string();
         stdout().execute(MoveUp(1)).expect("failed move cursor");
         println!("{}", buff);
-        let msg = encrypt_message(&buff, &send_passphrase);
+        let msg = encrypt_message(&buff);
         match tx.send(msg) {
             Ok(_) => (),
             Err(e) => {
