@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 openssl = "0.10.34"
 crossterm = "0.19.0"
+rpassword = "5.0"
