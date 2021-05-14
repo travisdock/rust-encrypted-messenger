@@ -21,10 +21,10 @@ fn main() {
         Ok(client) => {
             client.set_nonblocking(true).expect("failed to initiate non-blocking");
 
-            match authenticate_keys() {
+            match validate_keys() {
                 Ok(_) => (),
                 Err(_) => {
-                    println!("Could not authenticate keys");
+                    println!("Could not validate keys");
                     return ()
                 }
             }

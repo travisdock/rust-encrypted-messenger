@@ -10,7 +10,7 @@ pub mod crypto {
     const RECEIVER_PUBLIC: &str = "test_public.pem";
     const RECEIVER_PRIVATE: &str = "test_private.pem";
 
-    pub fn authenticate_keys() -> Result<(),()> {
+    pub fn validate_keys() -> Result<(),()> {
         // sign test message with own private key
         let private_key = fs::read(SENDER_PRIVATE).expect("Unable to find private key");
         let key = PKey::private_key_from_pem(&private_key).unwrap();
