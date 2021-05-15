@@ -10,22 +10,30 @@ pub mod crypto {
     const RECEIVER_PUBLIC: &str = "test_public.pem";
     const RECEIVER_PRIVATE: &str = "test_private.pem";
 
-    pub fn validate_keys() -> Result<(),()> {
+    pub fn validate_keys() -> Result<(),&'static str> {
         // sign test message with own private key
-        let private_key = fs::read(SENDER_PRIVATE).expect("Unable to find private key");
+        let private_key = match fs::read(SENDER_PRIVATE) {
+            Ok(key) => key,
+            Err(_) => return Err("Could not find private key"),
+        };
         let key = PKey::private_key_from_pem(&private_key).unwrap();
         let mut signer = Signer::new(MessageDigest::sha256(), &key).unwrap();
-        let msg = "passphrase test".as_bytes();
+        let msg = "key test".as_bytes();
         signer.update(&msg).unwrap();
         let signature = signer.sign_to_vec().unwrap();
 
         // verify test message with own public key
-        let public_key = fs::read(SENDER_PUBLIC).expect("Unable to find public key");
+        let public_key = match fs::read(RECEIVER_PUBLIC) {
+          Ok(key) => key,
+          Err(_) => return Err("Could not find public key"),
+        };
         let key = PKey::public_key_from_pem(&public_key).unwrap();
         let mut verifier = Verifier::new(MessageDigest::sha256(), &key).unwrap();
         verifier.update(&msg).unwrap();
-        verifier.verify(&signature).unwrap();
-        Ok(())
+        match verifier.verify(&signature) {
+            Ok(_) => Ok(()),
+            Err(_) =>  Err("Could not validate keys"),
+        }
     }
 
     pub fn encrypt_message(msg: &str) -> Vec<u8> {
