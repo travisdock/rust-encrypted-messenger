@@ -12,19 +12,23 @@ use crossterm::{
 mod lib;
 use crate::lib::crypto::*;
 
-const LOCAL: &str = "127.0.0.1:6000";
+// const LOCAL: &str = "127.0.0.1:6000";
 const MSG_SIZE: usize = 256;
 
 fn main() {
+    println!("Please input your server location");
+    let mut server_address = String::new();
+    io::stdin().read_line(&mut server_address).expect("reading from stdin failed");
+
     println!("Connecting to server...");
-    match TcpStream::connect(LOCAL) {
+    match TcpStream::connect(&server_address.trim()) {
         Ok(client) => {
             client.set_nonblocking(true).expect("failed to initiate non-blocking");
 
             match validate_keys() {
                 Ok(_) => (),
-                Err(_) => {
-                    println!("Could not validate keys");
+                Err(e) => {
+                    println!("{}", e);
                     return ()
                 }
             }
@@ -36,7 +40,7 @@ fn main() {
             println!("bye bye!");
         },
         Err(e) => {
-            println!("Could not connect to server at {} because of error: \"{}\"", LOCAL, e)
+            println!("Could not connect to server at {} because of error: \"{}\"", server_address.trim(), e)
         }
     }
 }
