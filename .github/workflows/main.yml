@@ -47,7 +47,7 @@ jobs:
         target: armv7-unknown-linux-musleabihf
 
     - name: Install necessary packages
-      run: sudo apt install gcc-arm-linux-musleabihf
+      run: sudo apt install armv7-unknown-linux-c
 
     - name: Build for Raspberry Pi
       run: cargo build --all --target=armv7-unknown-linux-musleabihf --release && strip target/release/client && mv target/release/client target/release/client_pi
