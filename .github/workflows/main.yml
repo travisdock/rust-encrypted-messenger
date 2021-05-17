@@ -1,0 +1,35 @@
+name: Rust
+
+on: [push]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-mac:
+
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install latest rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: x86_64-apple-darwin
+        default: true
+        override: true
+
+    - name: Build for Mac
+      run: cargo build --all --release && strip target/release/client && mv target/release/client target/release/client_darwin
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          target/release/client_darwin
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
