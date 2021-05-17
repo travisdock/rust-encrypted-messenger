@@ -45,8 +45,8 @@ jobs:
       with:
         toolchain: stable
         target: armv7-unknown-linux-gnueabihf
-        default: true
         override: true
+        default: true
 
     - name: Build for Raspberry Pi
       run: cargo build --all --release && strip target/release/client && mv target/release/client target/release/client_pi
