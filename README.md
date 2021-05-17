@@ -3,8 +3,11 @@ An encrypted messaging command line app that works via tcp
 
 ### Running a Client
  - Download the binary
- - `chmod 755 {FILENAME}`
- - `./{FILENAME}` (Give permission in System Preferences -> Security & Privacy -> General
+ - `chmod 755 {BINARY_FILENAME}`
+ - Create `private.pem` and `public.pem` keys (https://travistidwell.com/jsencrypt/demo/)
+ - Retrieve the public key of your fellow chatter in a `recipient_public.pem` file
+ - Place all keys in the same directory as your binary
+ - Run the binary: `./{BINARY_FILENAME}` (Give permission in System Preferences -> Security & Privacy -> General
  - Input your server location. E.g. `X.tcp.ngrok.io:XXXXX`
  - Input a username: `COOL_GUY_42`
  - Start chatting
