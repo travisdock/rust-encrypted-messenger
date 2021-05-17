@@ -13,6 +13,7 @@ mod lib;
 use crate::lib::crypto::*;
 
 // const LOCAL: &str = "127.0.0.1:6000";
+// example ngrok: "6.tcp.ngrok.io:11915"
 const MSG_SIZE: usize = 256;
 
 fn main() {

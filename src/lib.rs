@@ -5,10 +5,10 @@ pub mod crypto {
     use openssl::hash::MessageDigest;
     use std::fs;
 
-    const SENDER_PUBLIC: &str = "other_test_public.pem";
-    const SENDER_PRIVATE: &str = "other_test_private.pem";
-    const RECEIVER_PUBLIC: &str = "test_public.pem";
-    const RECEIVER_PRIVATE: &str = "test_private.pem";
+    const SENDER_PUBLIC: &str = "test_public.pem";
+    const SENDER_PRIVATE: &str = "test_private.pem";
+    const RECEIVER_PUBLIC: &str = "other_test_public.pem";
+    const RECEIVER_PRIVATE: &str = "other_test_private.pem";
 
     pub fn validate_keys() -> Result<(),&'static str> {
         // sign test message with own private key
