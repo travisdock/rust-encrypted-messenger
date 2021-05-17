@@ -44,13 +44,13 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: armv7-unknown-linux-gnueabihf
+        target: armv7-unknown-linux-musleabihf
 
     - name: Install necessary packages
-      run: sudo apt install gcc-arm-linux-gnueabihf
+      run: sudo apt install gcc-arm-linux-musleabihf
 
     - name: Build for Raspberry Pi
-      run: cargo build --all --target=armv7-unknown-linux-gnueabihf --release && strip target/release/client && mv target/release/client target/release/client_pi
+      run: cargo build --all --target=armv7-unknown-linux-musleabihf --release && strip target/release/client && mv target/release/client target/release/client_pi
 
     - name: Release
       uses: softprops/action-gh-release@v1
