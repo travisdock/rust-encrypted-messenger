@@ -47,7 +47,7 @@ jobs:
         target: armv7-unknown-linux-gnueabihf
 
     - name: Install necessary packages
-      run: sudo apt-get install build-essential
+      run: sudo apt install gcc-arm-linux-gnueabihf
 
     - name: Build for Raspberry Pi
       run: cargo build --all --target=armv7-unknown-linux-gnueabihf --release && strip target/release/client && mv target/release/client target/release/client_pi
