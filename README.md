@@ -1,7 +1,7 @@
 # Rust Encrypted Messenger
 An encrypted messaging command line app that works via tcp
 
-### Running a Client
+### Running a Client (OSX)
  - Download the binary
  - `chmod 755 {BINARY_FILENAME}`
  - Create `private.pem` and `public.pem` keys (https://travistidwell.com/jsencrypt/demo/)
