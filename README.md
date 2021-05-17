@@ -1,4 +1,4 @@
-# rust-encrypted-messenger
+# Rust Encrypted Messenger
 An encrypted messaging command line app that works via tcp
 
 ### Running a Client
