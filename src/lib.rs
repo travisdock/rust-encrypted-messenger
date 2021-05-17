@@ -5,10 +5,10 @@ pub mod crypto {
     use openssl::hash::MessageDigest;
     use std::fs;
 
-    const SENDER_PUBLIC: &str = "test_public.pem";
-    const SENDER_PRIVATE: &str = "test_private.pem";
-    const RECEIVER_PUBLIC: &str = "other_test_public.pem";
-    const RECEIVER_PRIVATE: &str = "other_test_private.pem";
+    const SENDER_PUBLIC: &str = "public.pem";
+    const SENDER_PRIVATE: &str = "private.pem";
+    const RECEIVER_PUBLIC: &str = "recipient_public.pem";
+    // const RECEIVER_PRIVATE: &str = "other_test_private.pem";
 
     pub fn validate_keys() -> Result<(),&'static str> {
         // sign test message with own private key
@@ -23,7 +23,7 @@ pub mod crypto {
         let signature = signer.sign_to_vec().unwrap();
 
         // verify test message with own public key
-        let public_key = match fs::read(RECEIVER_PUBLIC) {
+        let public_key = match fs::read(SENDER_PUBLIC) {
           Ok(key) => key,
           Err(_) => return Err("Could not find public key"),
         };
@@ -67,7 +67,7 @@ pub mod crypto {
     }
 
     pub fn sign_message(msg: &Vec<u8>) -> Vec<u8> {
-        let key = fs::read(RECEIVER_PRIVATE).unwrap();
+        let key = fs::read(SENDER_PRIVATE).unwrap();
         let key = PKey::private_key_from_pem(&key).unwrap();
         let mut signer = Signer::new(MessageDigest::sha256(), &key).unwrap();
         signer.update(&msg).unwrap();
@@ -75,7 +75,7 @@ pub mod crypto {
     }
 
     pub fn verify_message(msg: Vec<u8>, signature: Vec<u8>) -> Result<(), ()> {
-        let key = fs::read(SENDER_PUBLIC).unwrap();
+        let key = fs::read(RECEIVER_PUBLIC).unwrap();
         let key = PKey::public_key_from_pem(&key).unwrap();
         let mut verifier = Verifier::new(MessageDigest::sha256(), &key).unwrap();
         verifier.update(&msg).unwrap();
