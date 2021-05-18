@@ -10,9 +10,14 @@ use crossterm::{ExecutableCommand, cursor::{MoveUp, MoveLeft}};
 mod lib;
 use crate::lib::crypto::*;
 
+// defaults
+const MSG_SIZE: usize = 256;
+const SENDER_PUBLIC: &str = "src/test_keys/random_public.pem";
+const SENDER_PRIVATE: &str = "src/test_keys/private.pem";
+const RECEIVER_PUBLIC: &str = "src/test_keys/public.pem";
+// const RECEIVER_PRIVATE: &str = "other_test_private.pem";
 // example local: "127.0.0.1:6000";
 // example ngrok: "6.tcp.ngrok.io:11915"
-const MSG_SIZE: usize = 256;
 
 fn main() {
     println!("Please input your server location");
@@ -24,7 +29,7 @@ fn main() {
         Ok(client) => {
             client.set_nonblocking(true).expect("failed to initiate non-blocking");
 
-            match validate_keys() {
+            match validate_keys(SENDER_PRIVATE, SENDER_PUBLIC) {
                 Ok(_) => (),
                 Err(e) => {
                     println!("{}", e);
@@ -49,7 +54,7 @@ fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, mut client: TcpStream) {
         let mut buff = vec![0; MSG_SIZE];
         match client.read_exact(&mut buff) {
             Ok(_) => {
-                match decrypt_message(buff) {
+                match decrypt_message(buff, SENDER_PRIVATE, RECEIVER_PUBLIC) {
                     Ok(msg) => {
                       stdout().execute(MoveLeft(5000)).expect("failed move cursor");
                       println!("{}", msg)
@@ -95,7 +100,13 @@ fn start_input_loop(tx: mpsc::Sender<Vec<u8>>) {
         let buff = format!("{}: {}", username.trim(), buff.trim()).to_string();
         stdout().execute(MoveUp(1)).expect("failed move cursor");
         println!("{}", buff);
-        let msg = encrypt_message(&buff);
+        let msg = match encrypt_message(&buff, RECEIVER_PUBLIC, SENDER_PRIVATE) {
+            Ok(msg) => msg,
+            Err(e) => {
+                println!("Error while encrypting message: {}", e);
+                break
+            }
+        };
         match tx.send(msg) {
             Ok(_) => (),
             Err(e) => {
