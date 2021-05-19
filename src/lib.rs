@@ -61,7 +61,7 @@ pub mod crypto {
                     _ => {
                         let msg = String::from_utf8(buf).unwrap();
                         let unverfied_emoji = '\u{274c}';
-                        Ok(format!("{}  {}", unverfied_emoji, msg))
+                        Ok(format!("{}  (unverified message) {}", unverfied_emoji, msg))
                     },
                 }
             },
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn decrypt_message_prepends_unverification() {
       let msg = "Hello world!";
-      let unverified_msg = "❌  Hello world!";
+      let unverified_msg = "❌  (unverified message) Hello world!";
       let encrypted_msg = match encrypt_message(msg, RECEIVER_PUBLIC, SENDER_PRIVATE) {
           Ok(encrypted) => encrypted,
           Err(e) => return assert!(false, "{}", e),
