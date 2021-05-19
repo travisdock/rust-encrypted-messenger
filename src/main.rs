@@ -12,10 +12,10 @@ use crate::lib::crypto::*;
 
 // defaults
 const MSG_SIZE: usize = 256;
-const SENDER_PUBLIC: &str = "src/test_keys/random_public.pem";
-const SENDER_PRIVATE: &str = "src/test_keys/private.pem";
-const RECEIVER_PUBLIC: &str = "src/test_keys/public.pem";
-// const RECEIVER_PRIVATE: &str = "other_test_private.pem";
+const SENDER_PUBLIC: &str = "public.pem";
+const SENDER_PRIVATE: &str = "private.pem";
+const RECEIVER_PUBLIC: &str = "receiver_public.pem";
+// const RECEIVER_PRIVATE: &str = "receiver_private.pem";
 // example local: "127.0.0.1:6000";
 // example ngrok: "6.tcp.ngrok.io:11915"
 

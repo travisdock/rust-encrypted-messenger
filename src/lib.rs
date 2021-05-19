@@ -43,21 +43,25 @@ pub mod crypto {
 
     pub fn decrypt_message(
         mut msg: Vec<u8>,
-        sender_private_path: &str,
-        receiver_public_path: &str
+        receiver_private_path: &str,
+        sender_public_path: &str
     ) -> Result<String, openssl::error::ErrorStack> {
         let signature = msg.split_off(128);
-        let key = fs::read(sender_private_path).unwrap();
+        let key = fs::read(receiver_private_path).unwrap();
         let rsa = Rsa::private_key_from_pem(&key).unwrap();
         let mut buf: Vec<u8> = vec![0; rsa.size() as usize];
         match rsa.private_decrypt(&msg, &mut buf, Padding::PKCS1) {
             Ok(_) => {
-                match verify_message(msg, signature, receiver_public_path) {
-                    Ok(true) => Ok(String::from_utf8(buf).unwrap()),
+                match verify_message(msg, signature, sender_public_path) {
+                    Ok(true) => {
+                        let msg = String::from_utf8(buf).unwrap();
+                        let verified_emoji = '\u{2705}';
+                        Ok(format!("{}  {}", verified_emoji, msg))
+                    },
                     _ => {
-                        let mut msg = String::from_utf8(buf).unwrap();
-                        msg.push_str("      ****** Unable to verify legitimate sender");
-                        Ok(msg)
+                        let msg = String::from_utf8(buf).unwrap();
+                        let unverfied_emoji = '\u{274c}';
+                        Ok(format!("{}  {}", unverfied_emoji, msg))
                     },
                 }
             },
@@ -101,14 +105,14 @@ pub mod crypto {
 #[cfg(test)]
 mod tests {
     use super::crypto::{validate_keys, encrypt_message, decrypt_message};
-    const TEST_SENDER_PUBLIC: &str = "src/test_keys/public.pem";
-    const TEST_SENDER_PRIVATE: &str = "src/test_keys/private.pem";
-    const RANDOM_PUBLIC: &str = "src/test_keys/random_public.pem";
-    const RANDOM_PRIVATE: &str = "src/test_keys/random_private.pem";
+    const SENDER_PUBLIC: &str = "src/test_keys/sender_public.pem";
+    const SENDER_PRIVATE: &str = "src/test_keys/sender_private.pem";
+    const RECEIVER_PUBLIC: &str = "src/test_keys/receiver_public.pem";
+    const RECEIVER_PRIVATE: &str = "src/test_keys/receiver_private.pem";
 
     #[test]
     fn private_key_error_message() {
-        match validate_keys("invalid_private.pem", TEST_SENDER_PUBLIC) {
+        match validate_keys("invalid_sender_private.pem", SENDER_PUBLIC) {
             Ok(_) => assert!(false, "Should error"),
             Err(e) => assert_eq!(e, "Could not find private key")
         }
@@ -116,7 +120,7 @@ mod tests {
 
     #[test]
     fn public_key_error_message() {
-      match validate_keys(TEST_SENDER_PRIVATE, "invalid_public.pem") {
+      match validate_keys(SENDER_PRIVATE, "invalid_sender_public.pem") {
           Ok(_) => assert!(false, "Should error"),
           Err(e) => assert_eq!(e, "Could not find public key")
       }
@@ -124,9 +128,43 @@ mod tests {
 
     #[test]
     fn invalid_keys_error_message() {
-      match validate_keys(TEST_SENDER_PRIVATE, RANDOM_PUBLIC) {
+      match validate_keys(SENDER_PRIVATE, RECEIVER_PUBLIC) {
           Ok(_) => assert!(false, "Should error"),
           Err(e) => assert_eq!(e, "Could not validate keys")
+      }
+    }
+
+    #[test]
+    fn decrypt_message_works() {
+      let msg = "Hello world!";
+      let verified_msg = "✅  Hello world!";
+      let encrypted_msg = match encrypt_message(msg, RECEIVER_PUBLIC, SENDER_PRIVATE) {
+          Ok(encrypted) => encrypted,
+          Err(e) => return assert!(false, "{}", e),
+      };
+      match decrypt_message(encrypted_msg, RECEIVER_PRIVATE, SENDER_PUBLIC) {
+          Ok(decrypted) => assert_eq!(verified_msg, decrypted.trim_matches(char::from(0))),
+          Err(e) => {
+              println!("{}", e);
+              assert!(false, "Did not decrypt message")
+          },
+      }
+    }
+
+    #[test]
+    fn decrypt_message_prepends_unverification() {
+      let msg = "Hello world!";
+      let unverified_msg = "❌  Hello world!";
+      let encrypted_msg = match encrypt_message(msg, RECEIVER_PUBLIC, SENDER_PRIVATE) {
+          Ok(encrypted) => encrypted,
+          Err(e) => return assert!(false, "{}", e),
+      };
+      match decrypt_message(encrypted_msg, RECEIVER_PRIVATE, RECEIVER_PUBLIC) {
+          Ok(decrypted) => assert_eq!(unverified_msg, decrypted.trim_matches(char::from(0))),
+          Err(e) => {
+              println!("{}", e);
+              assert!(false, "Did not decrypt message")
+          },
       }
     }
 }
