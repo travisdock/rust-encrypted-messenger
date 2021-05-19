@@ -15,9 +15,8 @@ const MSG_SIZE: usize = 256;
 const SENDER_PUBLIC: &str = "public.pem";
 const SENDER_PRIVATE: &str = "private.pem";
 const RECEIVER_PUBLIC: &str = "receiver_public.pem";
-// const RECEIVER_PRIVATE: &str = "receiver_private.pem";
-// example local: "127.0.0.1:6000";
-// example ngrok: "6.tcp.ngrok.io:11915"
+// example local server: "127.0.0.1:6000";
+// example ngrok server: "6.tcp.ngrok.io:11915"
 
 fn main() {
     println!("Please input your server location");
@@ -61,6 +60,7 @@ fn spawn_listener_thread(rx: mpsc::Receiver<Vec<u8>>, mut client: TcpStream) {
                     },
                     Err(_e) => {
                         // Problem: We can't decrypt messages we sent, but the server always echos them back
+                        // Solution: Serialize messages and add sender metadata
                         // println!("Unable to decrypt message: {}", e);
                         ()
                     }
@@ -93,7 +93,7 @@ fn start_input_loop(tx: mpsc::Sender<Vec<u8>>) {
     io::stdin().read_line(&mut username).expect("reading from stdin failed");
     stdout().execute(MoveUp(1)).expect("failed move cursor");
 
-    println!("Write a Message:");
+    println!("Start chatting:");
     loop {
         let mut buff = String::new();
         io::stdin().read_line(&mut buff).expect("reading from stdin failed");
