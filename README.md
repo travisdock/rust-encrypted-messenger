@@ -1,7 +1,8 @@
 # Rust Encrypted Messenger
 An encrypted and signed messaging command line app that works via tcp
 
-<img width="479" alt="Screen Shot 2021-05-18 at 6 19 21 PM" src="https://user-images.githubusercontent.com/36681963/118739009-99d2ac00-b805-11eb-8516-11504abb7f3c.png">
+<img width="511" alt="Screen Shot 2021-05-18 at 6 51 05 PM" src="https://user-images.githubusercontent.com/36681963/118740879-3008d100-b80a-11eb-8a99-09dabc7e5f29.png">
+
 
 
 ### Running a Client (OSX)
