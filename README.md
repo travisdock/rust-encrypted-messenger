@@ -10,6 +10,7 @@ An encrypted and signed messaging command line app that works via tcp
  - Create a `private.pem` and `public.pem` key file (https://travistidwell.com/jsencrypt/demo/)
  - Retrieve the public key of your fellow chatter in a `recipient_public.pem` file (and give them yours)
  - Place all keys in the same directory as your binary
+ - Make sure you have a server running (https://github.com/travisdock/Rust-TCP-server)
  - Run the binary: `./BINARY_FILENAME` (If necessary give permission in System Preferences -> Security & Privacy -> General)
  - Input your server location. E.g. `X.tcp.ngrok.io:XXXXX`
  - Input a username: `COOL_GUY_42`
